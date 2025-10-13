@@ -5,6 +5,9 @@ import json
 from dotenv import load_dotenv
 from openai import OpenAI
 import gradio as gr
+import Functions_set
+import Db_utility
+from acnt_ai_agent.Functions_set import acc_function
 
 # Initialization
 
@@ -20,21 +23,7 @@ MODEL = "gpt-4o-mini"
 openai = OpenAI()
 
 
-price_function = {
-    "name": "get_acc_details",
-    "description": "Get the Account details of the user. Call this whenever you need to know the user account details, for example when a customer asks 'give account details'",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "user_id": {
-                "type": "string",
-                "description": "The user id mapped to User account",
-            },
-        },
-        "required": ["user_id"],
-        "additionalProperties": False
-    }
-}
+
 
 system_message = "You are a helpful assistant for an Bank account details. "
 system_message += "Give short, courteous answers, no more than 1 sentence. "
@@ -56,8 +45,9 @@ def get_acc_details(user_id):
     user = user_id.lower()
     return acc_deatils.get(user, "Unknown")
 
+
 # There's a particular dictionary structure that's required to describe our function:
-tools = [{"type": "function", "function": price_function}]
+tools = [{"type": "function", "function": acc_function[0]},{"type": "function", "function": acc_function[1]}]
 
 # We have to write that function handle_tool_call:
 

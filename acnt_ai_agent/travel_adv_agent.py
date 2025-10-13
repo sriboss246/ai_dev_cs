@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import gradio as gr
 
+
 # Initialization
 
 load_dotenv(override=True)
@@ -22,8 +23,8 @@ MODEL = "gpt-4o-mini"
 openai = OpenAI()
 
 
-price_function = {
-    "name": "get_ticket_price",
+ticket_function = {
+      "name": "get_ticket_price",
     "description": "Get the price of a return ticket to the destination city. Call this whenever you need to know the ticket price, for example when a customer asks 'How much is a ticket to this city'",
     "parameters": {
         "type": "object",
@@ -44,12 +45,6 @@ system_message += "Always be accurate. If you don't know the answer, say so."
 
 # This function looks rather simpler than the one from my video, because we're taking advantage of the latest Gradio updates
 
-def chat(message, history):
-    messages = [{"role": "system", "content": system_message}] + history + [{"role": "user", "content": message}]
-    response = openai.chat.completions.create(model=MODEL, messages=messages)
-    return response.choices[0].message.content
-
-gr.ChatInterface(fn=chat, type="messages").launch()
 
 ticket_prices = {"london": "$799", "paris": "$899", "tokyo": "$1400", "berlin": "$499"}
 
@@ -59,11 +54,12 @@ def get_ticket_price(destination_city):
     return ticket_prices.get(city, "Unknown")
 
 # There's a particular dictionary structure that's required to describe our function:
-tools = [{"type": "function", "function": price_function}]
+tools = [{"type": "function", "function": ticket_function}]
 
 # We have to write that function handle_tool_call:
 
 def handle_tool_call(message):
+    print("handle message ",message)
     tool_call = message.tool_calls[0]
     arguments = json.loads(tool_call.function.arguments)
     city = arguments.get('destination_city')
@@ -79,8 +75,9 @@ def handle_tool_call(message):
 
 def chat(message, history):
     messages = [{"role": "system", "content": system_message}] + history + [{"role": "user", "content": message}]
+    print(messages)
     response = openai.chat.completions.create(model=MODEL, messages=messages, tools=tools)
-
+    print(str(response))
     if response.choices[0].finish_reason == "tool_calls":
         print(f"Tool_call returned {response.choices[0].finish_reason}")
         message = response.choices[0].message
