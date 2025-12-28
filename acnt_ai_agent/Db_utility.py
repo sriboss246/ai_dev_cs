@@ -42,6 +42,18 @@ class Db_utility:
         cursor.close()
         return recs
 
+    def run_query_asDF(self,query):
+        print("Running query :",query)
+        conn = self.connect()
+        #cursor = conn.cursor()
+        #cursor.execute(query)
+        #recs = cursor.fetchall()
+        #cols=cursor.description
+        #df = pd.DataFrame(data=recs,columns=cols)
+        #cursor.close()
+        df=pd.read_sql(query,conn)
+        return df
+
 
 
 
